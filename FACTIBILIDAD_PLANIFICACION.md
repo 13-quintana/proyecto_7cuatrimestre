@@ -6,7 +6,24 @@
 
 El proyecto consiste en desarrollar un Sistema de Control de Gastos Personales que permita registrar ingresos y gastos, organizarlos por categorías y consultar información para llevar un mejor control del dinero.
 
-Para desarrollar el sistema se propone utilizar **Python** como lenguaje de programación, ya que permite implementar la lógica del sistema y procesar la información. Para almacenar y administrar los datos se utilizará **MySQL**, un gestor de bases de datos que hemos trabajado anteriormente y que nos permitirá organizar la información de los usuarios, ingresos, gastos y categorías.
+Para desarrollar el sistema se utilizará **Python** como
+lenguaje de programación y **Flask** como framework web,
+permitiendo implementar la lógica de negocio, la
+autenticación y la comunicación con la base de datos.
+
+El almacenamiento de la información se realizará
+mediante **Microsoft SQL Server**, utilizando tablas
+relacionales para administrar usuarios, movimientos
+financieros, categorías y metas de ahorro.
+
+La interfaz del sistema se desarrollará mediante
+**HTML5, CSS3 y JavaScript**, aplicando un diseño
+adaptable a diferentes dispositivos.
+
+También se emplearán **Git y GitHub** para controlar
+versiones, trabajar mediante ramas y mantener
+organizadas las aportaciones del equipo.
+
 
 También utilizaremos **Git y GitHub** para administrar los cambios, trabajar mediante ramas y mantener organizadas las aportaciones de los integrantes del equipo.
 
@@ -38,22 +55,48 @@ La posible resistencia al cambio se puede reducir mediante una interfaz intuitiv
 
 ## 2. Cronograma de Trabajo y Diagrama de Gantt
 
-El siguiente cronograma muestra las actividades principales del proyecto y el tiempo estimado para cada una, de acuerdo con la planificación indicada en la guía de prácticas.
+
+## 2. Cronograma de Trabajo y Diagrama de Gantt
+
+El proyecto se organiza mediante una estructura de
+desglose del trabajo (WBS), considerando las actividades
+de análisis, diseño, integración, construcción y pruebas.
+
+| WBS | Actividad | Periodo planificado |
+|---|---|---|
+| 1.1 | Factibilidad y requisitos | 14 al 20 de octubre |
+| 1.2 | UML de comportamiento | 21 al 27 de octubre |
+| 1.3 | UML estructural y base de datos | 28 de octubre al 3 de noviembre |
+| 1.4 | Integración del portafolio U2 | 11 de noviembre |
+| 2.1 | Backend y frontend | 4 al 17 de noviembre |
+| 2.2 | Pruebas y despliegue | 18 al 24 de noviembre |
+
+### Diagrama de Gantt
 
 ```mermaid
 gantt
-    title Cronograma de Desarrollo - Proyecto Final Integrador
+    title Cronograma de MiFinanzas
     dateFormat YYYY-MM-DD
-    section Unidad 2: Análisis y Diseño
-    Estudio de Factibilidad y SRS :a1, 2026-10-14, 7d
-    Modelado UML de Comportamiento :a2, 2026-10-21, 7d
-    Modelado Estructural y Base de Datos :a3, 2026-10-28, 7d
-    section Unidad 3: Construcción y Pruebas
-    Desarrollo Backend y Frontend :b1, 2026-11-04, 14d
-    Pruebas y Despliegue :b2, 2026-11-18, 7d
+    axisFormat %d/%m
+
+    section Unidad 2
+    1.1 Factibilidad y SRS :a1, 2026-10-14, 7d
+    1.2 UML comportamiento :a2, 2026-10-21, 7d
+    1.3 UML y base de datos :a3, 2026-10-28, 7d
+    1.4 Portafolio U2 :milestone, a4, 2026-11-11, 0d
+
+    section Unidad 3
+    2.1 Backend y frontend :b1, 2026-11-04, 14d
+    2.2 Pruebas y despliegue :b2, 2026-11-18, 7d
 ```
 
-El cronograma permite organizar las actividades y visualizar las etapas de análisis, diseño, construcción y pruebas. Las fechas podrán ajustarse si se presentan cambios en los requerimientos o en el avance del equipo.
+El cronograma representa la planificación académica
+del proyecto. Las actividades de construcción pueden
+desarrollarse en paralelo con la integración documental.
+
+Las fechas son estimadas y podrán ajustarse según el
+avance y las necesidades del equipo.
+
 
 ## 3. Matriz de Asignación de Responsabilidades (RACI)
 

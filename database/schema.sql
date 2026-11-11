@@ -1,52 +1,185 @@
-CREATE DATABASE IF NOT EXISTS control_gastos;
-USE control_gastos;
 
+IF DB_ID(N'MiFinanzas') IS NULL
+BEGIN
+    CREATE DATABASE MiFinanzas;
+END;
+GO
 
-CREATE TABLE IF NOT EXISTS usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    email VARCHAR(150) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+USE MiFinanzas;
+GO
 
-CREATE TABLE IF NOT EXISTS categorias (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion VARCHAR(255),
-    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+IF OBJECT_ID(N'dbo.Usuarios', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Usuarios (
+        IdUsuario INT IDENTITY(1,1) NOT NULL,
+        Nombre VARCHAR(100) NOT NULL,
+        Correo VARCHAR(150) NOT NULL,
+        Contrasena VARCHAR(255) NOT NULL,
+        FechaRegistro DATETIME2 NOT NULL
+            CONSTRAINT DF_Usuarios_FechaRegistro
+            DEFAULT SYSDATETIME(),
 
-CREATE TABLE IF NOT EXISTS movimientos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL,
-    categoria_id INT NOT NULL,
-    monto DECIMAL(10,2) NOT NULL,
-    tipo ENUM('ingreso', 'gasto') NOT NULL,
-    fecha DATE NOT NULL,
-    descripcion VARCHAR(255),
-    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT PK_Usuarios
+            PRIMARY KEY (IdUsuario),
 
-    CONSTRAINT chk_monto_positivo
-        CHECK (monto > 0),
+        CONSTRAINT UQ_Usuarios_Correo
+            UNIQUE (Correo)
+    );
+END;
+GO
 
-    CONSTRAINT fk_movimiento_usuario
-        FOREIGN KEY (usuario_id)
-        REFERENCES usuarios(id)
-        ON DELETE CASCADE,
+IF OBJECT_ID(N'dbo.Categorias', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Categorias (
+        IdCategoria INT IDENTITY(1,1) NOT NULL,
+        Nombre VARCHAR(100) NOT NULL,
+        Tipo VARCHAR(20) NOT NULL,
+        Descripcion VARCHAR(255) NULL,
+        FechaRegistro DATETIME2 NOT NULL
+            CONSTRAINT DF_Categorias_FechaRegistro
+            DEFAULT SYSDATETIME(),
 
-    CONSTRAINT fk_movimiento_categoria
-        FOREIGN KEY (categoria_id)
-        REFERENCES categorias(id)
-        ON DELETE RESTRICT
-);
+        CONSTRAINT PK_Categorias
+            PRIMARY KEY (IdCategoria),
 
+        CONSTRAINT CK_Categorias_Tipo
+            CHECK (Tipo IN ('Ingreso', 'Gasto')),
 
-CREATE INDEX idx_movimientos_usuario
-    ON movimientos(usuario_id);
+        CONSTRAINT UQ_Categorias_NombreTipo
+            UNIQUE (Nombre, Tipo)
+    );
+END;
+GO
 
-CREATE INDEX idx_movimientos_categoria
-    ON movimientos(categoria_id);
+IF OBJECT_ID(N'dbo.Movimientos', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Movimientos (
+        IdMovimiento INT IDENTITY(1,1) NOT NULL,
+        IdUsuario INT NOT NULL,
+        IdCategoria INT NOT NULL,
+        Tipo VARCHAR(20) NOT NULL,
+        Descripcion VARCHAR(150) NULL,
+        Monto DECIMAL(10,2) NOT NULL,
+        Fecha DATE NOT NULL,
+        FechaRegistro DATETIME2 NOT NULL
+            CONSTRAINT DF_Movimientos_FechaRegistro
+            DEFAULT SYSDATETIME(),
 
-CREATE INDEX idx_movimientos_fecha
-    ON movimientos(fecha);
+        CONSTRAINT PK_Movimientos
+            PRIMARY KEY (IdMovimiento),
+
+        CONSTRAINT FK_Movimientos_Usuarios
+            FOREIGN KEY (IdUsuario)
+            REFERENCES dbo.Usuarios(IdUsuario),
+
+        CONSTRAINT FK_Movimientos_Categorias
+            FOREIGN KEY (IdCategoria)
+            REFERENCES dbo.Categorias(IdCategoria),
+
+        CONSTRAINT CK_Movimientos_Monto
+            CHECK (Monto > 0),
+
+        CONSTRAINT CK_Movimientos_Tipo
+            CHECK (Tipo IN ('Ingreso', 'Gasto'))
+    );
+END;
+GO
+
+IF OBJECT_ID(N'dbo.MetasAhorro', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.MetasAhorro (
+        IdMeta INT IDENTITY(1,1) NOT NULL,
+        IdUsuario INT NOT NULL,
+        Nombre VARCHAR(100) NOT NULL,
+        MontoObjetivo DECIMAL(10,2) NOT NULL,
+        MontoAhorrado DECIMAL(10,2) NOT NULL
+            CONSTRAINT DF_Metas_MontoAhorrado
+            DEFAULT 0,
+        FechaLimite DATE NULL,
+        Estado VARCHAR(20) NOT NULL
+            CONSTRAINT DF_Metas_Estado
+            DEFAULT 'En progreso',
+
+        CONSTRAINT PK_MetasAhorro
+            PRIMARY KEY (IdMeta),
+
+        CONSTRAINT FK_MetasAhorro_Usuarios
+            FOREIGN KEY (IdUsuario)
+            REFERENCES dbo.Usuarios(IdUsuario),
+
+        CONSTRAINT CK_Metas_MontoObjetivo
+            CHECK (MontoObjetivo > 0),
+
+        CONSTRAINT CK_Metas_MontoAhorrado
+            CHECK (MontoAhorrado >= 0),
+
+        CONSTRAINT CK_Metas_Estado
+            CHECK (
+                Estado IN (
+                    'En progreso',
+                    'Completada',
+                    'Cancelada'
+                )
+            )
+    );
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_Movimientos_UsuarioFecha'
+      AND object_id = OBJECT_ID(N'dbo.Movimientos')
+)
+BEGIN
+    CREATE INDEX IX_Movimientos_UsuarioFecha
+        ON dbo.Movimientos(IdUsuario, Fecha DESC);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_Movimientos_Categoria'
+      AND object_id = OBJECT_ID(N'dbo.Movimientos')
+)
+BEGIN
+    CREATE INDEX IX_Movimientos_Categoria
+        ON dbo.Movimientos(IdCategoria);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = N'IX_MetasAhorro_Usuario'
+      AND object_id = OBJECT_ID(N'dbo.MetasAhorro')
+)
+BEGIN
+    CREATE INDEX IX_MetasAhorro_Usuario
+        ON dbo.MetasAhorro(IdUsuario);
+END;
+GO
+
+SELECT TABLE_NAME AS NombreTabla
+FROM INFORMATION_SCHEMA.TABLES
+WHERE TABLE_TYPE = 'BASE TABLE'
+  AND TABLE_SCHEMA = 'dbo'
+ORDER BY TABLE_NAME;
+GO
+
+SELECT
+    TABLE_NAME AS Tabla,
+    COLUMN_NAME AS Columna,
+    DATA_TYPE AS TipoDato,
+    IS_NULLABLE AS PermiteNulos
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'dbo'
+  AND TABLE_NAME IN (
+      'Usuarios',
+      'Categorias',
+      'Movimientos',
+      'MetasAhorro'
+  )
+ORDER BY TABLE_NAME, ORDINAL_POSITION;
+GO

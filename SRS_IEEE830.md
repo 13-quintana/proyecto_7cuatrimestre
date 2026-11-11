@@ -10,7 +10,7 @@ El propósito de este documento es explicar qué funciones tendrá nuestro Siste
 
 Nuestro proyecto consiste en desarrollar un Sistema de Control de Gastos Personales que ayude a las personas a organizar mejor su dinero. La idea es que puedan registrar sus ingresos y gastos, clasificarlos por categorías y consultar cuánto dinero reciben, cuánto gastan y cuál es su balance.
 
-Buscamos que el sistema sea fácil de usar y que permita consultar la información sin tener que llevar todos los registros manualmente. Para trabajar en el proyecto utilizaremos Python para programar las funciones y MySQL para guardar y administrar los datos.
+Buscamos que el sistema sea fácil de usar y que permita consultar la información sin tener que llevar todos los registros manualmente. Para trabajar en el proyecto utilizaremos Python para programar las funciones y SQL server para guardar y administrar los datos.
 
 En esta primera versión nos enfocaremos en el registro de ingresos y gastos, la organización de los movimientos y la consulta de resúmenes. Por el momento, no contemplamos funciones como la conexión directa con cuentas bancarias.
 
@@ -45,16 +45,52 @@ En esta sección describimos las funciones que queremos incluir en nuestro siste
 
 ## 3. Requerimientos No Funcionales (RNF)
 
-Además de las funciones anteriores, nuestro sistema debe cumplir con ciertas características para que sea útil, seguro y fácil de utilizar.
+Los requerimientos no funcionales establecen las
+características de calidad que deberá cumplir
+MiFinanzas, tomando como referencia ISO/IEC 25010.
 
-- **RNF-01 (Rendimiento):** Buscaremos que las consultas y operaciones más comunes se realicen en un tiempo adecuado, sin que el usuario tenga que esperar demasiado.
-- **RNF-02 (Seguridad):** La información de los usuarios deberá estar protegida. Se deberán validar las credenciales y evitar que una persona pueda consultar o modificar los movimientos de otra.
-- **RNF-03 (Facilidad de uso):** La aplicación deberá tener una interfaz sencilla, con opciones claras y mensajes que ayuden al usuario a saber si una operación se realizó correctamente.
-- **RNF-04 (Integridad de los datos):** El sistema deberá revisar que los datos ingresados sean válidos, por ejemplo, que los importes sean correctos y que no falten los campos obligatorios.
-- **RNF-05 (Mantenimiento):** Organizaremos el código para que sea más fácil encontrar errores y realizar cambios cuando sea necesario. También utilizaremos Git y GitHub para llevar un control de las modificaciones del proyecto.
-- **RNF-06 (Almacenamiento):** Utilizaremos MySQL para guardar los datos y comprobar que los ingresos, gastos y demás registros se almacenen y consulten correctamente.
+| Código | Característica de calidad | Requisito | Criterio de aceptación |
+|---|---|---|---|
+| RNF-01 | Eficiencia de desempeño | El sistema deberá responder oportunamente a las operaciones de consulta y registro. | El 95% de las consultas del dashboard deberá completarse en menos de 3 segundos bajo una carga de prueba de 10 usuarios concurrentes. |
+| RNF-02 | Seguridad | Cada usuario deberá acceder únicamente a sus propios datos financieros. | Un usuario autenticado no podrá consultar ni modificar movimientos pertenecientes a otra cuenta. |
+| RNF-03 | Usabilidad | La interfaz deberá ser clara, intuitiva y adaptable a computadoras y celulares. | Al menos 8 de cada 10 participantes deberán completar el registro de un gasto sin asistencia durante una prueba de usabilidad. |
+| RNF-04 | Fiabilidad | El sistema deberá preservar la integridad de los datos financieros. | No se permitirán movimientos con importes negativos o cero ni registros que incumplan restricciones de integridad. |
+| RNF-05 | Mantenibilidad | El código deberá organizarse en componentes que faciliten modificaciones y corrección de errores. | El proyecto deberá separar la interfaz, la lógica de aplicación y el acceso a datos, además de registrar cambios mediante Git. |
+| RNF-06 | Compatibilidad | La aplicación deberá funcionar en navegadores modernos. | Las funciones principales deberán superar pruebas en las versiones actuales de Chrome y Edge. |
 
-Estos requisitos son los objetivos que buscamos cumplir. Para comprobarlos, tendremos que realizar pruebas conforme avancemos con el desarrollo.
+### 3.1 Seguridad de la información
+
+MiFinanzas deberá proteger las credenciales de acceso
+mediante algoritmos de hash adecuados para contraseñas.
+
+Las consultas a la base de datos deberán utilizar
+parámetros para prevenir inyecciones SQL.
+
+Asimismo, cada movimiento financiero deberá
+asociarse con el identificador del usuario
+correspondiente.
+
+### 3.2 Persistencia de datos
+
+El sistema utilizará Microsoft SQL Server para
+almacenar usuarios, movimientos, categorías y
+metas de ahorro.
+
+La comunicación entre Python y SQL Server se
+realizará mediante el controlador pyodbc.
+
+La estructura de datos deberá contemplar claves
+primarias y foráneas para mantener la integridad
+referencial.
+
+### 3.3 Verificación de los requisitos
+
+Los requisitos anteriores representan objetivos
+de calidad que deberán validarse mediante pruebas
+funcionales, de seguridad, rendimiento y usabilidad.
+
+Su inclusión en esta especificación no significa
+que todos se encuentren implementados actualmente.
 
 ## 4. Diagrama de Casos de Uso y Descripción
 
@@ -117,7 +153,7 @@ sequenceDiagram
     actor U as Usuario
     participant I as Interfaz
     participant P as Python
-    participant DB as MySQL
+    participant DB as SQL server
 
     U->>I: Ingresa sus credenciales
     I->>P: Envía los datos
@@ -144,7 +180,7 @@ sequenceDiagram
     actor U as Usuario
     participant I as Interfaz
     participant P as Python
-    participant DB as MySQL
+    participant DB as SQL server
 
     U->>I: Ingresa los datos del gasto
     I->>P: Envía el importe, fecha y categoría
@@ -171,7 +207,7 @@ sequenceDiagram
     actor U as Usuario
     participant I as Interfaz
     participant P as Python
-    participant DB as MySQL
+    participant DB as SQL server
 
     U->>I: Solicita consultar su resumen
     I->>P: Envía la solicitud
@@ -188,7 +224,7 @@ Para revisar que el sistema funcione como esperamos, realizaremos pruebas confor
 
 - Que el usuario pueda registrarse e ingresar con sus credenciales correctas.
 - Que el sistema muestre un mensaje cuando los datos de acceso sean incorrectos.
-- Que los ingresos y gastos se guarden correctamente en MySQL.
+- Que los ingresos y gastos se guarden correctamente en SQL server.
 - Que el usuario pueda consultar y modificar sus propios movimientos.
 - Que los totales y el balance se calculen correctamente.
 - Que el sistema avise cuando falten datos o se ingresen valores incorrectos.
@@ -198,4 +234,4 @@ Para revisar que el sistema funcione como esperamos, realizaremos pruebas confor
 
 Con este documento definimos las funciones que queremos desarrollar en nuestro Sistema de Control de Gastos Personales y las características que debemos tomar en cuenta para que funcione correctamente.
 
-Los casos de uso nos ayudan a identificar las acciones que podrá realizar el usuario, mientras que los diagramas de secuencia muestran los pasos que seguirá el sistema en algunas operaciones. Esta información nos servirá como guía para continuar con el diseño y el desarrollo del proyecto utilizando Python y MySQL.
+Los casos de uso nos ayudan a identificar las acciones que podrá realizar el usuario, mientras que los diagramas de secuencia muestran los pasos que seguirá el sistema en algunas operaciones. Esta información nos servirá como guía para continuar con el diseño y el desarrollo del proyecto utilizando Python y SQL server.
